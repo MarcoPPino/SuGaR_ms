@@ -81,7 +81,11 @@ if __name__ == "__main__":
     # (Optional) Default configurations
     parser.add_argument('--low_poly', type=str2bool, default=False, 
                         help='Use standard config for a low poly mesh, with 200k vertices and 6 Gaussians per triangle.')
+    parser.add_argument('--mid_poly', type=str2bool, default=False,
+                        help='Use standard config for a high poly mesh, with 1M vertices and 1 Gaussians per triangle.')
     parser.add_argument('--high_poly', type=str2bool, default=False,
+                        help='Use standard config for a high poly mesh, with 1M vertices and 1 Gaussians per triangle.')
+    parser.add_argument('--ultra_poly', type=str2bool, default=False,
                         help='Use standard config for a high poly mesh, with 1M vertices and 1 Gaussians per triangle.')
     parser.add_argument('--refinement_time', type=str, default=None, 
                         help="Default configs for time to spend on refinement. Can be 'short', 'medium' or 'long'.")
@@ -101,10 +105,20 @@ if __name__ == "__main__":
         args.n_vertices_in_mesh = 200_000
         args.gaussians_per_triangle = 6
         print('Using low poly config.')
+    if args.mid_poly:
+        args.n_vertices_in_mesh = 700_000
+        args.gaussians_per_triangle = 3
+        print('Using mid poly config.')
     if args.high_poly:
-        args.n_vertices_in_mesh = 3_000_000
+        args.n_vertices_in_mesh = 1_000_000
         args.gaussians_per_triangle = 1
         print('Using high poly config.')
+    if args.ultra_poly:
+        args.n_vertices_in_mesh = 3_000_000
+        args.gaussians_per_triangle = 1
+        print('Using ultra poly config.')
+
+
     if args.refinement_time == 'test':
         args.refinement_iterations = 200
         print('Using short refinement time.')

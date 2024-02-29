@@ -211,7 +211,7 @@ def extract_mesh_from_coarse_sugar(args):
     
     # Create a mesh renderer
     faces_per_pixel = 10
-    max_faces_per_bin = 100_000
+    max_faces_per_bin = 50_000
 
     mesh_raster_settings = RasterizationSettings(
         image_size=(sugar.image_height, sugar.image_width),
