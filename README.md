@@ -4,8 +4,9 @@ This is just my playground and will probably be subject to a lot of changes whic
 <summary><span style="font-weight: bold;">General</span></summary>
 <ul>
   <li> Changed hard coded path seperators to (os.sep) this should support windows - tested on my local install</li>
-  <li> Changed max_faces_per_bin to 100k - contributes to slow training (sugar_model.py, coarse_mesh.py)</li>
-  <li> Changed n_vertices_in_mesh to 3mio - contributes contribute to slow training  (train.py)</li>
+  <li> <del> Changed max_faces_per_bin to 100k - contributes to slow training (sugar_model.py, coarse_mesh.py)</del></li>
+  <li> <del>Changed n_vertices_in_mesh to 3mio - contributes contribute to slow training  (train.py) </del> </li>
+  <li> Added mid_poly and ultra_poly flags for 700k and 3mio. vertecies</li>
 </ul>
 </details><br>
 
