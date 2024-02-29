@@ -1,4 +1,6 @@
 import argparse
+import os
+import time
 from sugar_utils.general_utils import str2bool
 from sugar_trainers.coarse_density import coarse_training_with_density_regularization
 from sugar_trainers.coarse_sdf import coarse_training_with_sdf_regularization
@@ -27,6 +29,10 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--iteration_to_load', 
                         type=int, default=7000, 
                         help='iteration to load.')
+    parser.add_argument('-o', '--output_dir',
+                        type=str, 
+                        default=None,
+                        help='OutputPath brudi')
     
     # Regularization for coarse SuGaR
     parser.add_argument('-r', '--regularization_type', type=str,
@@ -79,6 +85,9 @@ if __name__ == "__main__":
                         help='Use standard config for a high poly mesh, with 1M vertices and 1 Gaussians per triangle.')
     parser.add_argument('--refinement_time', type=str, default=None, 
                         help="Default configs for time to spend on refinement. Can be 'short', 'medium' or 'long'.")
+
+    parser.add_argument('--zzz', type=str2bool, default=False, 
+                        help='puts PC into hibernation after finishing')
       
     # Evaluation split
     parser.add_argument('--eval', type=str2bool, default=True, help='Use eval split.')
@@ -93,9 +102,12 @@ if __name__ == "__main__":
         args.gaussians_per_triangle = 6
         print('Using low poly config.')
     if args.high_poly:
-        args.n_vertices_in_mesh = 1_000_000
+        args.n_vertices_in_mesh = 3_000_000
         args.gaussians_per_triangle = 1
         print('Using high poly config.')
+    if args.refinement_time == 'test':
+        args.refinement_iterations = 200
+        print('Using short refinement time.')
     if args.refinement_time == 'short':
         args.refinement_iterations = 2_000
         print('Using short refinement time.')
@@ -109,22 +121,74 @@ if __name__ == "__main__":
         print('Will export a UV-textured mesh as an .obj file.')
     if args.export_ply:
         print('Will export a ply file with the refined 3D Gaussians at the end of the training.')
-    
+
+
+
+
     # ----- Optimize coarse SuGaR -----
     coarse_args = AttrDict({
         'checkpoint_path': args.checkpoint_path,
         'scene_path': args.scene_path,
         'iteration_to_load': args.iteration_to_load,
-        'output_dir': None,
+        'output_dir': args.output_dir,
         'eval': args.eval,
         'estimation_factor': 0.2,
         'normal_factor': 0.2,
         'gpu': args.gpu,
     })
-    if args.regularization_type == 'sdf':
-        coarse_sugar_path = coarse_training_with_sdf_regularization(coarse_args)
+
+    #create path for first directory TODO: check 
+    if args.output_dir is None:
+        if len(args.scene_path.split(os.sep)[-1]) > 0:
+            outputStarter = os.path.join("./output/coarse", args.scene_path.split(os.sep)[-1])
+        else:
+            outputStarter = os.path.join("./output/coarse", args.scene_path.split(os.sep)[-2])
+    else:
+        outputStarter = args.output_dir
+
+
+    if args.regularization_type == 'sdf':        
+        print("checking coarse_training_sdf...")
+        #check if files already exist
+        dirName = f'sugarcoarse_3Dgs{args.iteration_to_load}_sdfestimXX_sdfnormYY/'
+        dirName = os.path.join(outputStarter, dirName)
+        dirName = dirName.replace(
+            'XX', str(0.2).replace('.', '')
+            ).replace(
+                'YY', str(0.2).replace('.', '')
+                )
+        fp = os.path.join(dirName, '15000.pt')
+
+        if os.path.isfile(fp):
+            #trained already
+            print("SDF 15000pt already exists, skipping training...")
+            coarse_sugar_path = fp
+        else:
+            #not trained already
+            print("nothing found, STARTING SDF coarse training...")
+            coarse_sugar_path = coarse_training_with_sdf_regularization(coarse_args)
+    
+        
     elif args.regularization_type == 'density':
-        coarse_sugar_path = coarse_training_with_density_regularization(coarse_args)
+        print("checking coarse_training_density...")
+        #check if files already exist
+        dirName = f'sugarcoarse_3Dgs{args.iteration_to_load}_densityestimXX_sdfnormYY/'
+        dirName = os.path.join(outputStarter, dirName)
+        dirName = dirName.replace(
+            'XX', str(0.2).replace('.', '')
+            ).replace(
+                'YY', str(0.2).replace('.', '')
+                )
+        fp = os.path.join(dirName, '15000.pt')
+        if os.path.isfile(fp):
+            #trained already
+            print("DENSE 15000pt already exists, skipping training...")
+            coarse_sugar_path = fp
+        else:
+            #not trained already
+            print("nothing found, STARTING density coarse training...")
+            coarse_sugar_path = coarse_training_with_density_regularization(coarse_args)
+
     else:
         raise ValueError(f'Unknown regularization type: {args.regularization_type}')
     
@@ -137,7 +201,7 @@ if __name__ == "__main__":
         'coarse_model_path': coarse_sugar_path,
         'surface_level': args.surface_level,
         'decimation_target': args.n_vertices_in_mesh,
-        'mesh_output_dir': None,
+        'mesh_output_dir': args.output_dir,
         'bboxmin': args.bboxmin,
         'bboxmax': args.bboxmax,
         'center_bbox': args.center_bbox,
@@ -147,6 +211,28 @@ if __name__ == "__main__":
         'use_marching_cubes': False,
         'use_vanilla_3dgs': False,
     })
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("STARTING extract_mesh_from_coarse_sugar")
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+
+    # #check if file has been generated before
+    # print(f'files in {args.output_dir} :')
+    # print(os.listdir(args.output_dir))
+    # foundPLY = False
+    # for filename in os.listdir(args.output_dir):
+    #     if filename.endswith('.ply'):
+    #         #found file, proceeding without extraction
+    #         print(f'Found file proceeding to refine with: {os.path.join(args.output_dir, filename)}')
+    #         foundPLY = True
+
+    # if foundPLY:
+    #     coarse_mesh_path = os.path.join(args.output_dir, filename)
+    # else:
+    #     print("could not find anything proceeding to extract mesh")
+    #     coarse_mesh_path = extract_mesh_from_coarse_sugar(coarse_mesh_args)[0]
+
+
     coarse_mesh_path = extract_mesh_from_coarse_sugar(coarse_mesh_args)[0]
     
     
@@ -155,7 +241,7 @@ if __name__ == "__main__":
         'scene_path': args.scene_path,
         'checkpoint_path': args.checkpoint_path,
         'mesh_path': coarse_mesh_path,      
-        'output_dir': None,
+        'output_dir': args.output_dir,
         'iteration_to_load': args.iteration_to_load,
         'normal_consistency_factor': 0.1,    
         'gaussians_per_triangle': args.gaussians_per_triangle,        
@@ -167,6 +253,9 @@ if __name__ == "__main__":
         'eval': args.eval,
         'gpu': args.gpu,
     })
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("STARTING refined_training")
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     refined_sugar_path = refined_training(refined_args)
     
     
@@ -177,7 +266,8 @@ if __name__ == "__main__":
             'iteration_to_load': args.iteration_to_load,
             'checkpoint_path': args.checkpoint_path,
             'refined_model_path': refined_sugar_path,
-            'mesh_output_dir': None,
+            'coarse_model_path': coarse_sugar_path,
+            'mesh_output_dir': args.output_dir,
             'n_gaussians_per_surface_triangle': args.gaussians_per_triangle,
             'square_size': args.square_size,
             'eval': args.eval,
@@ -186,5 +276,24 @@ if __name__ == "__main__":
             'postprocess_density_threshold': args.postprocess_density_threshold,
             'postprocess_iterations': args.postprocess_iterations,
         })
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("STARTING extract_mesh_and_texture_from_refined_sugar")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         refined_mesh_path = extract_mesh_and_texture_from_refined_sugar(refined_mesh_args)
+
+
+    #put pc to sleep after execution
+    if args.zzz:
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("All done Boss! Going to hibernation in 30 seconds")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        time.sleep(30)
+        os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+    
         

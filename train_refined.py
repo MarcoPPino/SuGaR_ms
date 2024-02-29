@@ -20,6 +20,9 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--iteration_to_load', 
                         type=int, default=7000, 
                         help='iteration to load.')  
+
+    parser.add_argument('--refinement_time', type=str, default=None, 
+                        help="Default configs for time to spend on refinement. Can be 'short', 'medium' or 'long'.")
     
     parser.add_argument('-n', '--normal_consistency_factor', type=float, default=0.1, 
                         help='Factor to multiply the normal consistency loss by.')  
@@ -43,6 +46,16 @@ if __name__ == "__main__":
                         help='If True, export a ply files with the refined 3D Gaussians at the end of the training.')
 
     args = parser.parse_args()
+
+    if args.refinement_time == 'short':
+        args.refinement_iterations = 2_000
+        print('Using short refinement time.')
+    if args.refinement_time == 'medium':
+        args.refinement_iterations = 7_000
+        print('Using medium refinement time.')
+    if args.refinement_time == 'long':
+        args.refinement_iterations = 15_000
+        print('Using long refinement time.')
     
     # Call function
     refined_training(args)

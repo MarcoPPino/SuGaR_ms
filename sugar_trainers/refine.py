@@ -229,10 +229,10 @@ def refined_training(args):
     # ====================End of parameters====================
 
     if args.output_dir is None:
-        if len(args.scene_path.split("/")[-1]) > 0:
-            args.output_dir = os.path.join("./output/refined", args.scene_path.split("/")[-1])
+        if len(args.scene_path.split(os.sep)[-1]) > 0:
+            args.output_dir = os.path.join("./output/refined", args.scene_path.split(os.sep)[-1])
         else:
-            args.output_dir = os.path.join("./output/refined", args.scene_path.split("/")[-2])
+            args.output_dir = os.path.join("./output/refined", args.scene_path.split(os.sep)[-2])
             
     # Bounding box
     if args.bboxmin is None:
@@ -259,7 +259,7 @@ def refined_training(args):
     source_path = args.scene_path
     gs_checkpoint_path = args.checkpoint_path
     surface_mesh_to_bind_path = args.mesh_path
-    mesh_name = surface_mesh_to_bind_path.split("/")[-1].split(".")[0]
+    mesh_name = surface_mesh_to_bind_path.split(os.sep)[-1].split(".")[0]
     iteration_to_load = args.iteration_to_load    
     
     surface_mesh_normal_consistency_factor = args.normal_consistency_factor    
@@ -316,6 +316,8 @@ def refined_training(args):
     torch.autograd.set_detect_anomaly(detect_anomaly)
     
     # Creates save directory if it does not exist
+    print("creating DIR: ")
+    print(sugar_checkpoint_path)
     os.makedirs(sugar_checkpoint_path, exist_ok=True)
     
     # ====================Load NeRF model and training data====================
@@ -870,7 +872,9 @@ def refined_training(args):
     if export_ply_at_the_end:
         # Build path
         CONSOLE.print("\nExporting ply file with refined Gaussians...")
+        model_path = os.path.normpath(model_path)
         tmp_list = model_path.split(os.sep)
+        print(tmp_list)
         tmp_list[-4] = 'refined_ply'
         tmp_list.pop(-1)
         tmp_list[-1] = tmp_list[-1] + '.ply'

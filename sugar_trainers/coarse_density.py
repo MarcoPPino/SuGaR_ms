@@ -229,10 +229,10 @@ def coarse_training_with_density_regularization(args):
     # ====================End of parameters====================
 
     if args.output_dir is None:
-        if len(args.scene_path.split("/")[-1]) > 0:
-            args.output_dir = os.path.join("./output/coarse", args.scene_path.split("/")[-1])
+        if len(args.scene_path.split(os.sep)[-1]) > 0:
+            args.output_dir = os.path.join("./output/coarse", args.scene_path.split(os.sep)[-1])
         else:
-            args.output_dir = os.path.join("./output/coarse", args.scene_path.split("/")[-2])
+            args.output_dir = os.path.join("./output/coarse", args.scene_path.split(os.sep)[-2])
             
     source_path = args.scene_path
     gs_checkpoint_path = args.checkpoint_path
