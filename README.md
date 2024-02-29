@@ -1,6 +1,38 @@
+## Changes made in this fork
+This is just my playground and will probably be subject to a lot of changes which probably wont work out of the box / be stable
+<details>
+<summary><span style="font-weight: bold;">General</span></summary>
+<ul>
+  <li> Changed hard coded path seperators to (os.sep) this should support windows - tested on my local install</li>
+  <li> Changed max_faces_per_bin to 100k - contributes to slow training (sugar_model.py, coarse_mesh.py)</li>
+  <li> Changed n_vertices_in_mesh to 3mio - contributes contribute to slow training  (train.py)</li>
+</ul>
+</details><br>
+
+<details>
+<summary><span style="font-weight: bold;">Quality of life</span></summary>
+<ul>
+  <li> Added --output_dir option to all scripts - doesnt work properly for now</li>
+  <li> Added --zzz option to train.py and extract_refined_mesh_with_texture.py to put PC into hibernationmode after finishing</li>
+</ul>
+</details><br>
+
+<details>
+<summary><span style="font-weight: bold;">Todo</span></summary>
+<ul>
+  <li> Change the way dirs are created and handled (dont really like coarse/project, refined/project.. would rather have project/coarse, project/refined...)</li>
+  <li> Edit pipeline scripts to automagically find all needed data only from input and output </li>
+</ul>
+</details><br>
+
+
 <div align="center">
 
+
+
 # SuGaR: Surface-Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction and High-Quality Mesh Rendering
+
+
 
 <font size="4">
 <a href="https://anttwo.github.io/" style="font-size:100%;">Antoine Guédon</a>&emsp;
