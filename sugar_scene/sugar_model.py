@@ -1294,7 +1294,7 @@ class SuGaR(nn.Module):
             
         if rasterizer is None:
             faces_per_pixel = 10
-            max_faces_per_bin = 50_000
+            max_faces_per_bin = 100_000
 
             mesh_raster_settings = RasterizationSettings(
                 image_size=(self.image_height, self.image_width),

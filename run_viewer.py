@@ -13,6 +13,11 @@ if __name__ == "__main__":
                         type=str, 
                         default=None,
                         help='(Required) path to the refined SuGaR PLY file.')
+
+    parser.add_argument('-o', '--obj_path',
+                        type=str, 
+                        default=None,
+                        help='(Required) path to the refined SuGaR OBJ file.')
     
     args = parser.parse_args()
     ply_path = args.ply_path
@@ -21,9 +26,11 @@ if __name__ == "__main__":
     if ply_path is None:
         raise ValueError('Please provide a path to the refined SuGaR PLY file.')
     if not os.path.exists(ply_path) or not ply_path.endswith('.ply'):
+        print("PATH IS:::")
+        print(ply_path)
         raise ValueError('Could not find the refined SuGaR PLY file.')
     
-    obj_path = ply_path.replace('.ply', '.obj').replace('refined_ply', 'refined_mesh')
+    obj_path = args.obj_path
     png_path = obj_path.replace('.obj', '.png')
     
     if not os.path.exists(obj_path):

@@ -1,4 +1,5 @@
 import argparse
+import os
 from sugar_utils.general_utils import str2bool
 from sugar_extractors.refined_mesh import extract_mesh_and_texture_from_refined_sugar
 
@@ -17,10 +18,14 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--refined_model_path',
                         type=str, 
                         help='(Required) Path to the refine model checkpoint.')  # --OK
+    parser.add_argument('-co', '--coarse_model_path',
+                        type=str, 
+                        help='(Required) Path to the coarse model checkpoint.')  # --OK
     parser.add_argument('-o', '--mesh_output_dir',
                         type=str, 
                         default=None, 
                         help='path to the output directory.')  # --OK
+
     parser.add_argument('-n', '--n_gaussians_per_surface_triangle',
                         default=None, type=int, help='Number of gaussians per surface triangle.')  # --OK
     parser.add_argument('--square_size',
@@ -28,6 +33,8 @@ if __name__ == "__main__":
     
     parser.add_argument('--eval', type=str2bool, default=True, help='Use eval split.')
     parser.add_argument('-g', '--gpu', type=int, default=0, help='Index of GPU to use.')
+
+    parser.add_argument('--zzz', type=str2bool, default=False, help='puts PC into hibernation after finishing')
     
     # Optional postprocessing
     parser.add_argument('--postprocess_mesh', type=str2bool, default=False, 
@@ -43,4 +50,19 @@ if __name__ == "__main__":
     
     # Call function
     extract_mesh_and_texture_from_refined_sugar(args)
+
+
+        #put pc to sleep after execution
+    if args.zzz:
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("All done Boss! Going to hibernation in 30 seconds")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        time.sleep(30)
+        os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
     
