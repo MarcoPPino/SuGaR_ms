@@ -98,6 +98,7 @@ if __name__ == "__main__":
 
     # GPU
     parser.add_argument('--gpu', type=int, default=0, help='Index of GPU device to use.')
+    parser.add_argument('--white_background', type=str2bool, default=False, help='Use a white background instead of black.')
 
     # Parse arguments
     args = parser.parse_args()
@@ -149,6 +150,7 @@ if __name__ == "__main__":
         'estimation_factor': 0.2,
         'normal_factor': 0.2,
         'gpu': args.gpu,
+        'white_background': args.white_background,
     })
 
     #create path for first directory TODO: check 
@@ -266,6 +268,7 @@ if __name__ == "__main__":
         'export_ply': args.export_ply,
         'eval': args.eval,
         'gpu': args.gpu,
+        'white_background': args.white_background,
     })
     print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     print("STARTING refined_training")
